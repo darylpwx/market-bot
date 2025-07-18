@@ -351,15 +351,7 @@ def generate_professional_summary(market_data, economic_indicators, news_data, s
         except:
             return str(value)
     
-    system_msg = """You are a senior institutional portfolio manager with 20+ years of experience writing daily market commentary for sophisticated investors, hedge funds, and family offices. Your analysis should be:
-
-1. Quantitative and data-driven
-2. Forward-looking with specific trading insights
-3. Include risk management recommendations
-4. Provide actionable positioning advice
-5. Use institutional terminology and concepts
-6. Include specific levels, targets, and scenarios
-7. Integrate current news catalysts into the analysis"""
+    system_msg = "You are a market analyst. Summarize what happened, the impact on the market, and what it means for investors in a concise tone."
 
     # Build top stories string
     news_str = ""
@@ -388,32 +380,19 @@ def generate_professional_summary(market_data, economic_indicators, news_data, s
     for sector, perf in sector_rotation[:5]:
         sector_str += f"• {sector}: {safe_format_change(perf)}%\n"
 
-    user_msg = f"""📊 INSTITUTIONAL MARKET BRIEF - {datetime.now().strftime('%B %d, %Y')}
+    user_msg = f"""🧠 MARKET SNAPSHOT - {datetime.now().strftime("%b %d, %Y")}
 
-MARKET SNAPSHOT:
-• SPY: {spy_price} ({spy_change}%) | RSI: {spy_rsi}
-• VIX: {vix_price} ({vix_change}%) | Regime: {sentiment.get('market_regime', 'Normal')}
-• 10Y Yield: {ten_y_yield}% ({ten_y_change}bps)
-• Risk Level: {risk_metrics.get('risk_level', 'Normal')}
+SPY: {spy_price} ({spy_change}%) | RSI: {spy_rsi}
+VIX: {vix_price} | Regime: {sentiment.get("market_regime", "Normal")}
+10Y Yield: {ten_y_yield}%
+Key Levels: Support={support_level}, Resistance={resistance_level}
 
-SECTOR ROTATION:
-{sector_str}
+Top Headlines:
+1. {top_stories[0]["title"]} ({top_stories[0]["source"]})
+2. {top_stories[1]["title"]} ({top_stories[1]["source"]})
+3. {top_stories[2]["title"]} ({top_stories[2]["source"]})
 
-KEY TECHNICAL LEVELS:
-• SPY Support: {support_level} | Resistance: {resistance_level}
-• Volume vs 20D Avg: {volume_ratio}x
-
-TOP MARKET CATALYSTS:
-{news_str}
-
-Write a sophisticated daily brief with:
-1. EXECUTIVE SUMMARY (2-3 sentences on key theme, incorporating top news)
-2. TACTICAL POSITIONING (specific trades/hedges based on current catalysts)
-3. RISK MANAGEMENT (position sizing, hedging recommendations)
-4. TECHNICAL OUTLOOK (key levels, scenarios with probabilities)
-5. CATALYSTS AHEAD (upcoming events, earnings, data releases)
-
-Use institutional language. Be specific about levels, timeframes, and probabilities. Include both bull and bear scenarios with specific triggers. Reference the news catalysts in your analysis."""
+Summarize what happened, the impact on markets, and what it means to investors."""
 
     try:
         response = client.chat.completions.create(
