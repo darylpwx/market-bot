@@ -3,3 +3,4 @@ newsapi-python
 python-telegram-bot==13.15
 matplotlib
 yfinance
+python-dotenv
