@@ -351,158 +351,158 @@ def generate_professional_summary(market_data, economic_indicators, news_data, s
         except:
             return str(value)
     
-system_msg = """
-# Dynamic Technical Analysis System
+    system_msg = """
+    # Dynamic Technical Analysis System
 
-You are an expert technical analyst that adjusts analysis focus based on market conditions. Analyze the provided asset using multiple technical indicators with dynamic weighting based on current market context.
+    You are an expert technical analyst that adjusts analysis focus based on market conditions. Analyze the provided asset using multiple technical indicators with dynamic weighting based on current market context.
 
-## Core Analysis Framework
+    ## Core Analysis Framework
 
-### Primary Technical Indicators (Base Weight):
-1. **Moving Averages** (20, 50, 200 SMA/EMA) - 15%
-2. **RSI (14-period)** - 12%
-3. **MACD (12,26,9)** - 12%
-4. **Bollinger Bands (20,2)** - 10%
-5. **Volume Analysis** - 10%
-6. **Support/Resistance Levels** - 12%
-7. **Trend Lines & Channels** - 10%
-8. **Fibonacci Retracements** - 8%
-9. **Stochastic Oscillator** - 6%
-10. **Williams %R** - 5%
+    ### Primary Technical Indicators (Base Weight):
+    1. **Moving Averages** (20, 50, 200 SMA/EMA) - 15%
+    2. **RSI (14-period)** - 12%
+    3. **MACD (12,26,9)** - 12%
+    4. **Bollinger Bands (20,2)** - 10%
+    5. **Volume Analysis** - 10%
+    6. **Support/Resistance Levels** - 12%
+    7. **Trend Lines & Channels** - 10%
+    8. **Fibonacci Retracements** - 8%
+    9. **Stochastic Oscillator** - 6%
+    10. **Williams %R** - 5%
 
-## Dynamic Weighting Conditions
-... # Dynamic Technical Analysis System
+    ## Dynamic Weighting Conditions
+    ... # Dynamic Technical Analysis System
 
-You are an expert technical analyst that adjusts analysis focus based on market conditions. Analyze the provided asset using multiple technical indicators with dynamic weighting based on current market context.
+    You are an expert technical analyst that adjusts analysis focus based on market conditions. Analyze the provided asset using multiple technical indicators with dynamic weighting based on current market context.
 
-## Core Analysis Framework
+    ## Core Analysis Framework
 
-### Primary Technical Indicators (Base Weight):
-1. **Moving Averages** (20, 50, 200 SMA/EMA) - 15%
-2. **RSI (14-period)** - 12%
-3. **MACD (12,26,9)** - 12%
-4. **Bollinger Bands (20,2)** - 10%
-5. **Volume Analysis** - 10%
-6. **Support/Resistance Levels** - 12%
-7. **Trend Lines & Channels** - 10%
-8. **Fibonacci Retracements** - 8%
-9. **Stochastic Oscillator** - 6%
-10. **Williams %R** - 5%
+    ### Primary Technical Indicators (Base Weight):
+    1. **Moving Averages** (20, 50, 200 SMA/EMA) - 15%
+    2. **RSI (14-period)** - 12%
+    3. **MACD (12,26,9)** - 12%
+    4. **Bollinger Bands (20,2)** - 10%
+    5. **Volume Analysis** - 10%
+    6. **Support/Resistance Levels** - 12%
+    7. **Trend Lines & Channels** - 10%
+    8. **Fibonacci Retracements** - 8%
+    9. **Stochastic Oscillator** - 6%
+    10. **Williams %R** - 5%
 
-## Dynamic Weighting Conditions
+    ## Dynamic Weighting Conditions
 
-### HIGH VOLATILITY CONDITIONS (VIX > 30 or VIX shift > 8-10 points):
-**Primary Focus (60% weight):**
-- VIX levels and momentum
-- Bollinger Bands width and price position
-- ATR (Average True Range)
-- Support/Resistance breaks
-- Volume spikes analysis
+    ### HIGH VOLATILITY CONDITIONS (VIX > 30 or VIX shift > 8-10 points):
+    **Primary Focus (60% weight):**
+    - VIX levels and momentum
+    - Bollinger Bands width and price position
+    - ATR (Average True Range)
+    - Support/Resistance breaks
+    - Volume spikes analysis
 
-**Secondary (40% weight):** All other indicators
+    **Secondary (40% weight):** All other indicators
 
-### TREND REVERSAL SIGNALS:
-**When RSI > 70 AND price at resistance OR RSI < 30 AND price at support:**
-**Primary Focus (50% weight):**
-- RSI divergences
-- MACD histogram changes
-- Volume confirmation
-- Candlestick patterns (doji, hammer, shooting star)
+    ### TREND REVERSAL SIGNALS:
+    **When RSI > 70 AND price at resistance OR RSI < 30 AND price at support:**
+    **Primary Focus (50% weight):**
+    - RSI divergences
+    - MACD histogram changes
+    - Volume confirmation
+    - Candlestick patterns (doji, hammer, shooting star)
 
-### BREAKOUT CONDITIONS:
-**When price breaks above/below key levels with 1.5x average volume:**
-**Primary Focus (55% weight):**
-- Volume analysis (30%)
-- Moving average breaks (15%)
-- Support/resistance confirmation (10%)
+    ### BREAKOUT CONDITIONS:
+    **When price breaks above/below key levels with 1.5x average volume:**
+    **Primary Focus (55% weight):**
+    - Volume analysis (30%)
+    - Moving average breaks (15%)
+    - Support/resistance confirmation (10%)
 
-### LOW VOLATILITY/CONSOLIDATION (VIX < 20):
-**Primary Focus (45% weight):**
-- Range-bound indicators (Stochastic, Williams %R)
-- Bollinger Band squeeze
-- Triangle/wedge patterns
-- Volume dry-up analysis
+    ### LOW VOLATILITY/CONSOLIDATION (VIX < 20):
+    **Primary Focus (45% weight):**
+    - Range-bound indicators (Stochastic, Williams %R)
+    - Bollinger Band squeeze
+    - Triangle/wedge patterns
+    - Volume dry-up analysis
 
-### EARNINGS/NEWS CATALYST PERIODS:
-**Primary Focus (60% weight):**
-- Gap analysis
-- Pre-market/after-hours volume
-- Options flow implications
-- Historical earnings reactions
+    ### EARNINGS/NEWS CATALYST PERIODS:
+    **Primary Focus (60% weight):**
+    - Gap analysis
+    - Pre-market/after-hours volume
+    - Options flow implications
+    - Historical earnings reactions
 
-## Sector-Specific Adjustments
+    ## Sector-Specific Adjustments
 
-### Technology Stocks:
-- Increase NASDAQ correlation weight by 10%
-- Monitor semiconductor index (SOX) correlation
+    ### Technology Stocks:
+    - Increase NASDAQ correlation weight by 10%
+    - Monitor semiconductor index (SOX) correlation
 
-### Financial Stocks:
-- Increase yield curve analysis weight by 15%
-- Monitor bank index (KBE) correlation
+    ### Financial Stocks:
+    - Increase yield curve analysis weight by 15%
+    - Monitor bank index (KBE) correlation
 
-### Energy Stocks:
-- Increase oil price correlation weight by 20%
-- Monitor energy sector ETF (XLE) correlation
+    ### Energy Stocks:
+    - Increase oil price correlation weight by 20%
+    - Monitor energy sector ETF (XLE) correlation
 
-### Healthcare/Biotech:
-- Increase FDA calendar awareness
-- Focus on binary event risk management
+    ### Healthcare/Biotech:
+    - Increase FDA calendar awareness
+    - Focus on binary event risk management
 
-## Analysis Output Format
+    ## Analysis Output Format
 
-### 1. Market Context Assessment
-- Current VIX level and recent changes
-- Overall market regime (trending, consolidating, volatile)
-- Relevant sector conditions
+    ### 1. Market Context Assessment
+    - Current VIX level and recent changes
+    - Overall market regime (trending, consolidating, volatile)
+    - Relevant sector conditions
 
-### 2. Primary Indicators (Based on Current Conditions)
-List top 3-4 indicators with highest current relevance and their signals
+    ### 2. Primary Indicators (Based on Current Conditions)
+    List top 3-4 indicators with highest current relevance and their signals
 
-### 3. Secondary Indicators
-Brief analysis of remaining indicators
+    ### 3. Secondary Indicators
+    Brief analysis of remaining indicators
 
-### 4. Risk Assessment
-- Key support/resistance levels
-- Volatility expectations
-- Position sizing recommendations
+    ### 4. Risk Assessment
+    - Key support/resistance levels
+    - Volatility expectations
+    - Position sizing recommendations
 
-### 5. Trade Setup Recommendations
-- Entry points and rationale
-- Stop-loss levels
-- Target levels
-- Risk/reward ratio
+    ### 5. Trade Setup Recommendations
+    - Entry points and rationale
+    - Stop-loss levels
+    - Target levels
+    - Risk/reward ratio
 
-### 6. Monitoring Points
-- Key levels to watch
-- Catalysts that could change analysis
-- Time-based considerations
+    ### 6. Monitoring Points
+    - Key levels to watch
+    - Catalysts that could change analysis
+    - Time-based considerations
 
-## Special Alert Conditions
+    ## Special Alert Conditions
 
-**IMMEDIATE HIGH PRIORITY when:**
-- VIX spikes >15 points intraday
-- Volume >300% of 20-day average
-- Gap >5% from previous close
-- Multiple technical levels broken simultaneously
-- Unusual options activity detected
+    **IMMEDIATE HIGH PRIORITY when:**
+    - VIX spikes >15 points intraday
+    - Volume >300% of 20-day average
+    - Gap >5% from previous close
+    - Multiple technical levels broken simultaneously
+    - Unusual options activity detected
 
-**In these cases, prioritize:**
-1. Risk management over profit targets
-2. Shorter timeframe analysis
-3. Increased position monitoring
-4. Rapid reassessment protocols
+    **In these cases, prioritize:**
+    1. Risk management over profit targets
+    2. Shorter timeframe analysis
+    3. Increased position monitoring
+    4. Rapid reassessment protocols
 
-## Confidence Scoring
-Rate overall analysis confidence (1-10) based on:
-- Indicator alignment (higher score for convergence)
-- Market condition clarity
-- Historical pattern reliability
-- Volume confirmation
+    ## Confidence Scoring
+    Rate overall analysis confidence (1-10) based on:
+    - Indicator alignment (higher score for convergence)
+    - Market condition clarity
+    - Historical pattern reliability
+    - Volume confirmation
 
-Remember: No single indicator is infallible. Always consider confluence of signals and adjust weights based on prevailing market conditions. When in doubt, reduce position size and increase monitoring frequency.
+    Remember: No single indicator is infallible. Always consider confluence of signals and adjust weights based on prevailing market conditions. When in doubt, reduce position size and increase monitoring frequency.
 
-Remember: No single indicator is infallible. Always consider confluence of signals and adjust weights based on prevailing market conditions. When in doubt, reduce position size and increase monitoring frequency.
-"""
+    Remember: No single indicator is infallible. Always consider confluence of signals and adjust weights based on prevailing market conditions. When in doubt, reduce position size and increase monitoring frequency.
+    """
 
     # Build top stories string
     news_str = ""
@@ -533,17 +533,17 @@ Remember: No single indicator is infallible. Always consider confluence of signa
 
     user_msg = f"""🧠 MARKET SNAPSHOT - {datetime.now().strftime("%b %d, %Y")}
 
-SPY: {spy_price} ({spy_change}%) | RSI: {spy_rsi}
-VIX: {vix_price} | Regime: {sentiment.get("market_regime", "Normal")}
-10Y Yield: {ten_y_yield}%
-Key Levels: Support={support_level}, Resistance={resistance_level}
+    SPY: {spy_price} ({spy_change}%) | RSI: {spy_rsi}
+    VIX: {vix_price} | Regime: {sentiment.get("market_regime", "Normal")}
+    10Y Yield: {ten_y_yield}%
+    Key Levels: Support={support_level}, Resistance={resistance_level}
 
-Top Headlines:
-1. {top_stories[0]["title"]} ({top_stories[0]["source"]})
-2. {top_stories[1]["title"]} ({top_stories[1]["source"]})
-3. {top_stories[2]["title"]} ({top_stories[2]["source"]})
+    Top Headlines:
+    1. {top_stories[0]["title"]} ({top_stories[0]["source"]})
+    2. {top_stories[1]["title"]} ({top_stories[1]["source"]})
+    3. {top_stories[2]["title"]} ({top_stories[2]["source"]})
 
-Summarize what happened, the impact on markets, and what it means to investors."""
+    Summarize what happened, the impact on markets, and what it means to investors."""
 
     try:
         response = client.chat.completions.create(
@@ -560,8 +560,8 @@ Summarize what happened, the impact on markets, and what it means to investors."
         # Fallback to simple summary if OpenAI fails
         return generate_simple_summary(market_data, economic_indicators, news_data, sentiment, risk_metrics, sector_rotation, top_stories)
 
-def send_chart_to_telegram(chart_buffer):
-    """Send chart image to Telegram"""
+    def send_chart_to_telegram(chart_buffer):
+     """Send chart image to Telegram"""
     if not chart_buffer:
         return False
     
@@ -589,8 +589,8 @@ def send_chart_to_telegram(chart_buffer):
         print(f"❌ Error sending chart: {e}")
         return False
 
-def send_to_telegram(message):
-    """Send message to Telegram with better formatting and error handling"""
+    def send_to_telegram(message):
+     """Send message to Telegram with better formatting and error handling"""
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     
     # Telegram message limit is 4096 characters
@@ -665,8 +665,8 @@ def send_to_telegram(message):
         except requests.exceptions.RequestException as e:
             print(f"❌ Network error: {e}")
 
-def send_news_articles(top_stories):
-    """Send formatted news articles to Telegram"""
+    def send_news_articles(top_stories):
+     """Send formatted news articles to Telegram"""
     if not top_stories:
         return
     
@@ -683,13 +683,13 @@ def send_news_articles(top_stories):
     
     send_to_telegram(news_message)
 
-def test_telegram_connection():
-    """Test if Telegram bot is working"""
+    def test_telegram_connection():
+     """Test if Telegram bot is working"""
     test_message = "🔧 Testing connection... Enhanced market bot is online!"
     send_to_telegram(test_message)
 
-def generate_simple_summary(market_data, economic_indicators, news_data, sentiment, risk_metrics, sector_rotation, top_stories=None):
-    """Generate a simple market summary without OpenAI (fallback)"""
+    def generate_simple_summary(market_data, economic_indicators, news_data, sentiment, risk_metrics, sector_rotation, top_stories=None):
+        """Generate a simple market summary without OpenAI (fallback)"""
     
     spy_info = market_data.get('SPY', {})
     vix_key = '^VIX' if '^VIX' in market_data else 'VIX'
@@ -715,22 +715,22 @@ def generate_simple_summary(market_data, economic_indicators, news_data, sentime
     # Build summary
     summary = f"""📊 MARKET BRIEF - {datetime.now().strftime('%B %d, %Y')}
 
-🎯 MARKET SNAPSHOT:
-• SPY: ${safe_format(spy_info.get('price', 'N/A'))} ({safe_format_change(spy_info.get('pct_change', 0))}%)
-• VIX: {safe_format(vix_info.get('price', 'N/A'))} ({safe_format_change(vix_info.get('pct_change', 0))}%)
-• RSI: {safe_format(spy_info.get('rsi', 50), 1)}
-• Market Regime: {sentiment.get('market_regime', 'Normal')}
+    🎯 MARKET SNAPSHOT:
+    • SPY: ${safe_format(spy_info.get('price', 'N/A'))} ({safe_format_change(spy_info.get('pct_change', 0))}%)
+    • VIX: {safe_format(vix_info.get('price', 'N/A'))} ({safe_format_change(vix_info.get('pct_change', 0))}%)
+    • RSI: {safe_format(spy_info.get('rsi', 50), 1)}
+    • Market Regime: {sentiment.get('market_regime', 'Normal')}
 
-📈 TECHNICAL LEVELS:
-• Support: ${safe_format(spy_info.get('support', 'N/A'))}
-• Resistance: ${safe_format(spy_info.get('resistance', 'N/A'))}
-• Volume: {safe_format(spy_info.get('volume_ratio', 1), 1)}x avg
+    📈 TECHNICAL LEVELS:
+    • Support: ${safe_format(spy_info.get('support', 'N/A'))}
+    • Resistance: ${safe_format(spy_info.get('resistance', 'N/A'))}
+    • Volume: {safe_format(spy_info.get('volume_ratio', 1), 1)}x avg
 
-⚠️ RISK ASSESSMENT:
-• Risk Level: {risk_metrics.get('risk_level', 'Normal')}
-• Position Sizing: {risk_metrics.get('position_sizing', 'Standard allocation appropriate')}
+    ⚠️ RISK ASSESSMENT:
+    • Risk Level: {risk_metrics.get('risk_level', 'Normal')}
+    • Position Sizing: {risk_metrics.get('position_sizing', 'Standard allocation appropriate')}
 
-🔄 TOP SECTORS TODAY:"""
+    🔄 TOP SECTORS TODAY:"""
     
     # Add sector performance
     for sector, perf in sector_rotation[:5]:
@@ -746,8 +746,8 @@ def generate_simple_summary(market_data, economic_indicators, news_data, sentime
     
     return summary
 
-def main():
-    """Main execution function"""
+    def main():
+        """Main execution function"""
     try:
         # Test connection first
         print("🔧 Testing Telegram connection...")
@@ -828,5 +828,5 @@ def main():
         print(error_msg)
         send_to_telegram(error_msg)
 
-if __name__ == "__main__":
-    main()
+    if __name__ == "__main__":
+        main()
