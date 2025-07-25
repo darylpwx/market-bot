@@ -125,29 +125,18 @@ def format_message(results_tqqq, summary_tqqq, results_sqqq, summary_sqqq):
     time_str = now.strftime('%Y-%m-%d %H:%M')
     msg = f"📈 *Intraday TQQQ/SQQQ Signals* - {time_str}\n\n"
 
-    msg += "🎯 Analyzing: *TQQQ*
-
-🔍 *Indicator Breakdown:*
-"
+    msg += "🎯 Analyzing: *TQQQ*\n\n🔍 *Indicator Breakdown:*\n"
     for name, value, comment in results_tqqq:
-        msg += f"• {name}: {value} → {comment}
-"
-    msg += f"
-{summary_tqqq}
+        msg += f"• {name}: {value} → {comment}\n"
+    msg += f"\n{summary_tqqq}\n\n"
 
-"
-
-    msg += "🎯 Analyzing: *SQQQ*
-
-🔍 *Indicator Breakdown:*
-"
+    msg += "🎯 Analyzing: *SQQQ*\n\n🔍 *Indicator Breakdown:*\n"
     for name, value, comment in results_sqqq:
-        msg += f"• {name}: {value} → {comment}
-"
-    msg += f"
-{summary_sqqq}"
+        msg += f"• {name}: {value} → {comment}\n"
+    msg += f"\n{summary_sqqq}"
 
     return msg
+
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
