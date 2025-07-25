@@ -14,68 +14,142 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
 # Constants
-TICKERS = ["TQQQ", "SQQQ"]
 INTERVAL = "15m"
 PERIOD = "2d"
 
-# Market hours in UTC for 9:30 AM to 2:00 AM SGT
 SGT = pytz.timezone("Asia/Singapore")
 now = datetime.now(SGT)
 hour = now.hour
-minute = now.minute
 allowed_hours = list(range(9, 24)) + list(range(0, 2))  # 9AM - 2AM SGT
 
 def fetch_data(ticker):
     stock = yf.Ticker(ticker)
-    hist = stock.history(period=PERIOD, interval=INTERVAL)
-    return hist
+    return stock.history(period=PERIOD, interval=INTERVAL)
 
 def calculate_indicators(df):
     df['EMA9'] = df['Close'].ewm(span=9).mean()
-
     delta = df['Close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
     df['RSI'] = 100 - (100 / (1 + rs))
-
     exp1 = df['Close'].ewm(span=12, adjust=False).mean()
     exp2 = df['Close'].ewm(span=26, adjust=False).mean()
     macd = exp1 - exp2
     signal = macd.ewm(span=9, adjust=False).mean()
-    df['MACD'] = macd
-    df['MACD_Signal'] = signal
-    df['MACD_Hist'] = df['MACD'] - df['MACD_Signal']
-
+    df['MACD_Hist'] = macd - signal
+    df['VWAP'] = (df['Close'] * df['Volume']).cumsum() / df['Volume'].cumsum()
     df['AvgVolume'] = df['Volume'].rolling(window=20).mean()
     df['VolumeSpike'] = df['Volume'] > 1.5 * df['AvgVolume']
-    df['VWAP'] = (df['Close'] * df['Volume']).cumsum() / df['Volume'].cumsum()
-
     return df
 
-def generate_signal(df, ticker):
+def analyze_signals(df, ticker):
     latest = df.iloc[-1]
     previous = df.iloc[-2]
+    results = []
 
+    # RSI Logic
+    rsi = latest["RSI"]
+    prev_rsi = previous["RSI"]
     if ticker == "TQQQ":
-        if (
-            latest["RSI"] < 35 and
-            latest["RSI"] > previous["RSI"] and
-            latest["MACD_Hist"] > previous["MACD_Hist"] and
-            latest["Close"] > latest["EMA9"] > latest["VWAP"] and
-            latest["VolumeSpike"]
-        ):
-            return "🟢 TQQQ BUY SIGNAL @ ${:.2f}".format(latest["Close"])
-    elif ticker == "SQQQ":
-        if (
-            latest["RSI"] > 65 and
-            latest["RSI"] < previous["RSI"] and
-            latest["MACD_Hist"] < previous["MACD_Hist"] and
-            latest["Close"] < latest["EMA9"] < latest["VWAP"] and
-            latest["VolumeSpike"]
-        ):
-            return "🔴 SQQQ BUY SIGNAL @ ${:.2f}".format(latest["Close"])
-    return None
+        if rsi < 35 and rsi > prev_rsi:
+            results.append(("RSI", f"{rsi:.1f}", "✅ Buy Bias"))
+            rsi_signal = "Buy"
+        else:
+            results.append(("RSI", f"{rsi:.1f}", "❌ Wait"))
+            rsi_signal = "Wait"
+    else:
+        if rsi > 65 and rsi < prev_rsi:
+            results.append(("RSI", f"{rsi:.1f}", "✅ Sell Bias"))
+            rsi_signal = "Sell"
+        else:
+            results.append(("RSI", f"{rsi:.1f}", "❌ Wait"))
+            rsi_signal = "Wait"
+
+    # MACD Logic
+    macd_hist = latest["MACD_Hist"]
+    prev_macd_hist = previous["MACD_Hist"]
+    if ticker == "TQQQ":
+        if macd_hist > prev_macd_hist:
+            results.append(("MACD Histogram", f"{macd_hist:+.4f}", "✅ Buy Bias"))
+            macd_signal = "Buy"
+        else:
+            results.append(("MACD Histogram", f"{macd_hist:+.4f}", "❌ Wait"))
+            macd_signal = "Wait"
+    else:
+        if macd_hist < prev_macd_hist:
+            results.append(("MACD Histogram", f"{macd_hist:+.4f}", "✅ Sell Bias"))
+            macd_signal = "Sell"
+        else:
+            results.append(("MACD Histogram", f"{macd_hist:+.4f}", "❌ Wait"))
+            macd_signal = "Wait"
+
+    # Trend Logic
+    price = latest["Close"]
+    ema = latest["EMA9"]
+    vwap = latest["VWAP"]
+    if ticker == "TQQQ":
+        if price > ema > vwap:
+            results.append(("Price vs EMA9 & VWAP", f"${price:.2f} > ${ema:.2f} > ${vwap:.2f}", "✅ Bullish Trend"))
+            trend_signal = "Buy"
+        else:
+            results.append(("Price vs EMA9 & VWAP", f"${price:.2f}, ${ema:.2f}, ${vwap:.2f}", "❌ Wait"))
+            trend_signal = "Wait"
+    else:
+        if price < ema < vwap:
+            results.append(("Price vs EMA9 & VWAP", f"${price:.2f} < ${ema:.2f} < ${vwap:.2f}", "✅ Bearish Trend"))
+            trend_signal = "Sell"
+        else:
+            results.append(("Price vs EMA9 & VWAP", f"${price:.2f}, ${ema:.2f}, ${vwap:.2f}", "❌ Wait"))
+            trend_signal = "Wait"
+
+    # Volume Spike Logic
+    if latest["VolumeSpike"]:
+        results.append(("Volume Spike", "Yes", "✅ Confirmed Interest"))
+        volume_signal = "Buy" if ticker == "TQQQ" else "Sell"
+    else:
+        results.append(("Volume Spike", "No", "❌ Weak"))
+        volume_signal = "Wait"
+
+    votes = [rsi_signal, macd_signal, trend_signal, volume_signal]
+    if votes.count("Buy") >= 3 and ticker == "TQQQ":
+        overall = f"✅ *Overall Signal: BUY {ticker} @ ${price:.2f}*"
+    elif votes.count("Sell") >= 3 and ticker == "SQQQ":
+        overall = f"🔴 *Overall Signal: BUY {ticker} @ ${price:.2f}*"
+    else:
+        overall = f"⏳ *Overall Signal: WAIT for {ticker}*"
+
+    return results, overall
+
+def format_message(results_tqqq, summary_tqqq, results_sqqq, summary_sqqq):
+    time_str = now.strftime('%Y-%m-%d %H:%M')
+    msg = f"📈 *Intraday TQQQ/SQQQ Signals* - {time_str}
+
+"
+
+    msg += "🎯 Analyzing: *TQQQ*
+
+🔍 *Indicator Breakdown:*
+"
+    for name, value, comment in results_tqqq:
+        msg += f"• {name}: {value} → {comment}
+"
+    msg += f"
+{summary_tqqq}
+
+"
+
+    msg += "🎯 Analyzing: *SQQQ*
+
+🔍 *Indicator Breakdown:*
+"
+    for name, value, comment in results_sqqq:
+        msg += f"• {name}: {value} → {comment}
+"
+    msg += f"
+{summary_sqqq}"
+
+    return msg
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -96,21 +170,13 @@ def run_intraday_signal_bot():
         print("Outside trading signal window.")
         return
 
-    messages = []
-    for ticker in TICKERS:
-        df = fetch_data(ticker)
-        df = calculate_indicators(df)
-        signal = generate_signal(df, ticker)
-        if signal:
-            messages.append(signal)
+    df_tqqq = calculate_indicators(fetch_data("TQQQ"))
+    df_sqqq = calculate_indicators(fetch_data("SQQQ"))
 
-    if messages:
-        full_message = f"📈 *Intraday Trading Signals* - {now.strftime('%Y-%m-%d %H:%M')}\n\n" + "\n".join(messages)
+    results_tqqq, summary_tqqq = analyze_signals(df_tqqq, "TQQQ")
+    results_sqqq, summary_sqqq = analyze_signals(df_sqqq, "SQQQ")
 
-    else:
-        full_message = f"📈 *Intraday Trading Signals* - {now.strftime('%Y-%m-%d %H:%M')}\n\nNo actionable signals."
-
-
-    send_telegram_message(full_message)
+    message = format_message(results_tqqq, summary_tqqq, results_sqqq, summary_sqqq)
+    send_telegram_message(message)
 
 run_intraday_signal_bot()
