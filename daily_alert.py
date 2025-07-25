@@ -1,3 +1,53 @@
+
+
+def determine_tqqq_actionable(tqqq_price, buy_low, buy_high, spy_price, spy_support, spy_rsi, in_trade=False):
+    if in_trade:
+        if spy_price < spy_support:
+            return "Sell"
+        return "Hold"
+    if buy_low <= tqqq_price <= buy_high and spy_price <= spy_support and spy_rsi < 60:
+        return "Enter"
+    else:
+        return "Wait"
+
+def generate_tqqq_module(market_data, in_trade=False):
+    from datetime import datetime
+    spy = market_data.get("SPY", {})
+    tqqq = market_data.get("TQQQ", {})
+    vix = market_data.get("^VIX", {})
+
+    spy_price = spy.get("price", 0)
+    spy_rsi = spy.get("rsi", 50)
+    spy_support = spy.get("support", 0)
+    spy_resistance = spy.get("resistance", 0)
+    tqqq_price = tqqq.get("price", 0)
+
+    buy_low = round(tqqq_price * 0.9625, 2)
+    buy_high = round(tqqq_price * 0.984, 2)
+    stop_loss = round(tqqq_price * 0.923, 2)
+    target = round(tqqq_price * 1.043, 2)
+
+    actionable = determine_tqqq_actionable(tqqq_price, buy_low, buy_high, spy_price, spy_support, spy_rsi, in_trade)
+
+    return f"""🎯 TQQQ Trading Module – {datetime.now().strftime("%B %d, %Y")}
+✅ *Bullish Swing Setup Detected*
+
+📌 SPY Context:
+• SPY Price: ${spy_price} | RSI: {spy_rsi}
+• Support: ${spy_support} | Resistance: ${spy_resistance}
+• VIX: {vix.get("price", "N/A")}
+
+📈 TQQQ Levels:
+• Current: ${tqqq_price}
+• Buy Zone: ${buy_low} – ${buy_high}
+• Stop Loss: ${stop_loss}
+• Target: ${target}
+
+💡 Strategy: Buy near entry zone only if SPY pulls back to support with RSI < 60. Exit at target or if SPY fails support.
+🛠️ Actionable: {actionable}
+"""
+
+
 import os
 from dotenv import load_dotenv
 import requests
@@ -728,6 +778,8 @@ def main():
 
         # Send main analysis
         send_to_telegram(summary)
+        tqqq_message = generate_tqqq_module(market_data)
+        send_to_telegram(tqqq_message)
 
         # Send news articles
         if top_stories:
