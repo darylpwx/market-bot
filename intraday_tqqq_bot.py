@@ -105,13 +105,11 @@ def run_intraday_signal_bot():
             messages.append(signal)
 
     if messages:
-        full_message = f"📈 *Intraday Trading Signals* - {now.strftime('%Y-%m-%d %H:%M')}
+        full_message = f"📈 *Intraday Trading Signals* - {now.strftime('%Y-%m-%d %H:%M')}\n\n" + "\n".join(messages)
 
-" + "\n".join(messages)
     else:
-        full_message = f"📈 *Intraday Trading Signals* - {now.strftime('%Y-%m-%d %H:%M')}
+        full_message = f"📈 *Intraday Trading Signals* - {now.strftime('%Y-%m-%d %H:%M')}\n\nNo actionable signals."
 
-No actionable signals."
 
     send_telegram_message(full_message)
 
