@@ -2,7 +2,8 @@ name: Intraday TQQQ/SQQQ Signal Bot
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes UTC (SGT filtered in script)
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:        # ✅ Add this line to allow manual run
 
 jobs:
   run-intraday-bot:
