@@ -123,9 +123,7 @@ def analyze_signals(df, ticker):
 
 def format_message(results_tqqq, summary_tqqq, results_sqqq, summary_sqqq):
     time_str = now.strftime('%Y-%m-%d %H:%M')
-    msg = f"📈 *Intraday TQQQ/SQQQ Signals* - {time_str}
-
-"
+    msg = f"📈 *Intraday TQQQ/SQQQ Signals* - {time_str}\n\n"
 
     msg += "🎯 Analyzing: *TQQQ*
 
