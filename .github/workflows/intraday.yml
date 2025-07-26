@@ -1,53 +1,121 @@
-name: Intraday TQQQ/SQQQ Signal Bot
-on:
-  schedule:
-    # Monday-Friday 9:30 PM SGT to 2:00 AM SGT (next day)
-    # SGT is UTC+8, so we need to convert to UTC:
-    # 9:30 PM SGT = 1:30 PM UTC (13:30)
-    # 2:00 AM SGT = 6:00 PM UTC (18:00) previous day
-    
-    # Monday 9:30 PM SGT to Tuesday 2:00 AM SGT
-    - cron: '30/15 13-23 * * 1'     # Monday 1:30 PM - 11:45 PM UTC
-    - cron: '*/15 0-18 * * 2'       # Tuesday 12:00 AM - 6:00 PM UTC
-    
-    # Tuesday 9:30 PM SGT to Wednesday 2:00 AM SGT  
-    - cron: '30/15 13-23 * * 2'     # Tuesday 1:30 PM - 11:45 PM UTC
-    - cron: '*/15 0-18 * * 3'       # Wednesday 12:00 AM - 6:00 PM UTC
-    
-    # Wednesday 9:30 PM SGT to Thursday 2:00 AM SGT
-    - cron: '30/15 13-23 * * 3'     # Wednesday 1:30 PM - 11:45 PM UTC
-    - cron: '*/15 0-18 * * 4'       # Thursday 12:00 AM - 6:00 PM UTC
-    
-    # Thursday 9:30 PM SGT to Friday 2:00 AM SGT
-    - cron: '30/15 13-23 * * 4'     # Thursday 1:30 PM - 11:45 PM UTC
-    - cron: '*/15 0-18 * * 5'       # Friday 12:00 AM - 6:00 PM UTC
-    
-    # Friday 9:30 PM SGT to Saturday 2:00 AM SGT
-    - cron: '30/15 13-23 * * 5'     # Friday 1:30 PM - 11:45 PM UTC
-    - cron: '*/15 0-18 * * 6'       # Saturday 12:00 AM - 6:00 PM UTC
+import pytz
+from datetime import datetime, time
+import pandas as pd
 
-  workflow_dispatch:        # Manual trigger option
-
-jobs:
-  run-intraday-bot:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+class MarketHoursValidator:
+    """Validates if current time is within US market hours in Singapore timezone"""
+    
+    def __init__(self):
+        self.sgt = pytz.timezone('Asia/Singapore')
+        self.est = pytz.timezone('US/Eastern')
         
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          
-      - name: Run intraday TQQQ/SQQQ bot
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: |
-          python intraday_tqqq_bot.py
+    def is_market_open(self):
+        """Check if US stock market is currently open"""
+        now_sgt = datetime.now(self.sgt)
+        now_est = now_sgt.astimezone(self.est)
+        
+        # Check if it's a weekday (0=Monday, 6=Sunday)
+        if now_est.weekday() > 4:  # Saturday=5, Sunday=6
+            return False, "Market closed - Weekend"
+        
+        # Market hours: 9:30 AM - 4:00 PM EST/EDT
+        market_open = time(9, 30)
+        market_close = time(16, 0)
+        
+        current_time = now_est.time()
+        
+        if market_open <= current_time <= market_close:
+            return True, f"Market OPEN - EST: {now_est.strftime('%H:%M:%S')}, SGT: {now_sgt.strftime('%H:%M:%S')}"
+        else:
+            return False, f"Market CLOSED - EST: {now_est.strftime('%H:%M:%S')}, SGT: {now_sgt.strftime('%H:%M:%S')}"
+    
+    def get_next_market_open(self):
+        """Get the next market opening time in both EST and SGT"""
+        now_sgt = datetime.now(self.sgt)
+        now_est = now_sgt.astimezone(self.est)
+        
+        # Calculate next market day
+        next_market_day = now_est.date()
+        
+        # If it's weekend, move to Monday
+        if now_est.weekday() == 5:  # Saturday
+            next_market_day = pd.to_datetime(next_market_day) + pd.Timedelta(days=2)
+        elif now_est.weekday() == 6:  # Sunday  
+            next_market_day = pd.to_datetime(next_market_day) + pd.Timedelta(days=1)
+        elif now_est.time() >= time(16, 0):  # After market close
+            next_market_day = pd.to_datetime(next_market_day) + pd.Timedelta(days=1)
+            # Skip weekend
+            if next_market_day.weekday() > 4:
+                days_to_add = 7 - next_market_day.weekday()
+                next_market_day = next_market_day + pd.Timedelta(days=days_to_add)
+        
+        # Create next market open datetime
+        next_open_est = datetime.combine(next_market_day.date(), time(9, 30))
+        next_open_est = self.est.localize(next_open_est)
+        next_open_sgt = next_open_est.astimezone(self.sgt)
+        
+        return {
+            'est': next_open_est.strftime('%Y-%m-%d %H:%M:%S %Z'),
+            'sgt': next_open_sgt.strftime('%Y-%m-%d %H:%M:%S %Z')
+        }
+    
+    def get_current_trading_session_info(self):
+        """Get detailed info about current trading session"""
+        now_sgt = datetime.now(self.sgt)
+        now_est = now_sgt.astimezone(self.est)
+        
+        is_open, status = self.is_market_open()
+        
+        info = {
+            'is_market_open': is_open,
+            'status': status,
+            'current_time_sgt': now_sgt.strftime('%Y-%m-%d %H:%M:%S %Z'),
+            'current_time_est': now_est.strftime('%Y-%m-%d %H:%M:%S %Z'),
+            'weekday': now_est.strftime('%A'),
+            'next_open': self.get_next_market_open() if not is_open else None
+        }
+        
+        return info
+
+# Add this to the beginning of your intraday_tqqq_bot.py
+def validate_market_hours_and_exit():
+    """Validate market hours before running the bot"""
+    validator = MarketHoursValidator()
+    session_info = validator.get_current_trading_session_info()
+    
+    print("="*60)
+    print("🕐 MARKET HOURS VALIDATION")
+    print("="*60)
+    print(f"Current Time (SGT): {session_info['current_time_sgt']}")
+    print(f"Current Time (EST): {session_info['current_time_est']}")
+    print(f"Day of Week: {session_info['weekday']}")
+    print(f"Market Status: {session_info['status']}")
+    
+    if not session_info['is_market_open']:
+        print("❌ MARKET IS CLOSED - Exiting bot")
+        if session_info['next_open']:
+            print(f"📅 Next Market Open:")
+            print(f"   EST: {session_info['next_open']['est']}")
+            print(f"   SGT: {session_info['next_open']['sgt']}")
+        print("="*60)
+        exit(0)  # Exit gracefully without error
+    else:
+        print("✅ MARKET IS OPEN - Proceeding with bot")
+        print("="*60)
+        return True
+
+# Example usage in your main bot file:
+if __name__ == "__main__":
+    # Add this at the very beginning of your intraday_tqqq_bot.py
+    validate_market_hours_and_exit()
+    
+    # Your existing bot code continues here...
+    print("🤖 Starting TQQQ/SQQQ Intraday Signal Bot...")
+    
+    # Test the validator
+    validator = MarketHoursValidator()
+    session_info = validator.get_current_trading_session_info()
+    
+    print("\n📊 Current Session Info:")
+    for key, value in session_info.items():
+        print(f"   {key}: {value}")
